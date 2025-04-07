@@ -56,6 +56,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Comment::class);
     }
+    
 
     /**
      * Get all likes made by the user.

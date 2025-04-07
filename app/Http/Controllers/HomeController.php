@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Http\Request;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 
@@ -16,10 +17,12 @@ class HomeController extends Controller
      */
     public function index()
     {
-        // Fetch public posts with the user who created them
-        $posts = Post::with('user')->where('visibility', 'public')->latest()->get();
-
-        // Return data to the Home.vue component using Inertia
+        $posts = Post::with('user')
+        ->where('visibility', 'public')
+        ->latest()
+        ->paginate(6) 
+        ->withQueryString();
+        
         return Inertia::render('Home', [
             'posts' => $posts,
             'canLogin' => Route::has('login'),
@@ -27,5 +30,22 @@ class HomeController extends Controller
             'laravelVersion' => Application::VERSION,
             'phpVersion' => PHP_VERSION,
         ]);
+    }
+    public function readMore(Request $request, $id)
+    {
+        // Fetch the post by ID
+        //$post = Post::with('user')->findOrFail($id);
+        $post = Post::with(['user', 'comments.user'])->findOrFail($id);
+
+
+        // Return data to the ReadMore.vue component using Inertia
+        return Inertia::render('ReadMore', [
+            'post' => $post,
+            'canLogin' => Route::has('login'),
+            'canRegister' => Route::has('register'),
+            'laravelVersion' => Application::VERSION,
+            'phpVersion' => PHP_VERSION,
+        ]);
+        
     }
 }
